@@ -3,9 +3,13 @@ from datetime import date
 from tornado import web, escape, ioloop, httpclient, gen
 from drone import Altimeter, Drone, Hexacopter, LightEmittingDiode
 
-
 drone = Drone()
 
+class IndexHandler(web.RequestHandler):
+
+  def get(self):
+    self.set_status(status.HTTP_200_OK)
+    self.write("Hexacopter says hi")
 
 class HexacopterHandler(web.RequestHandler):
     SUPPORTED_METHODS = ("GET", "PATCH")
@@ -125,11 +129,15 @@ application = web.Application([
     (r"/hexacopters/([0-9]+)", HexacopterHandler),
     (r"/leds/([0-9]+)", LedHandler),
     (r"/altimeters/([0-9]+)", AltimeterHandler),
+    (r"/", IndexHandler),
 ], debug=True)
-
 
 if __name__ == "__main__":
     port = 8888
     print("Listening at port {0}".format(port))
     application.listen(port)
-    ioloop.IOLoop.instance().start()
+    try:
+        ioloop.IOLoop.instance().start()
+    except KeyboardInterrupt:
+        print(" exiting..")
+        ioloop.IOLoop.instance().stop()
